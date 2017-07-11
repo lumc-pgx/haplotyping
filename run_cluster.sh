@@ -20,7 +20,7 @@ while getopts ":d:" opt; do
 done
 
 snakemake --latency-wait 90 \
-          --drmaa ' -N variants -pe BWA {cluster.threads} -l h_vmem={cluster.vmem} -q all.q -cwd -V -j Y' \
+          --drmaa ' -N haplotyper -pe BWA {cluster.threads} -l h_vmem={cluster.vmem} -q all.q -cwd -V -j Y' \
           --drmaa-log-dir cluster_logs \
           --jobs 100 \
           --max-jobs-per-second 10 \
