@@ -26,20 +26,19 @@ localrules:
 
 rule all:
     input:
-        expand("haplotypes/{barcodes}.haplotypes.json", barcodes=BARCODE_IDS)
+        expand("haplotypes/{barcodes}.haplotype.txt", barcodes=BARCODE_IDS)
 
 
 rule haplotypes:
     input:
         alleles = config["VARIANT_DATA_PATH"] + "/{barcode}.json"
     output:
-        json = "haplotypes/{barcode}.haplotypes.json",
-        table = "haplotypes/{barcode}.haplotypes.txt"
+        json = "haplotypes/{barcode}.matches.json",
+        table = "haplotypes/{barcode}.matches.txt",
+        call = "haplotypes/{barcode}.haplotype.txt"
     params:
         gene = GENE,
         ignore_boundary = "OPTIONS" in config and "ignoreBoundary" in config["OPTIONS"]
     script:
         "scripts/compare_haplotypes.py"
-
-
 

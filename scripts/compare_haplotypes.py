@@ -161,11 +161,22 @@ for allele in alleles:
     match["sequence_id"] = allele["sequence_id"]
     
     table = tabulate_allele_matches(allele, match)
+
+    assignment = []
+    if len(match["haplotypes"]) > 0:
+        top_jaccard = match["haplotypes"][0]["jaccard"]
+        top_significant = match["haplotypes"][0]["significant"]
+
+        assignment = [h["haplotype"] for h in match["haplotypes"] if h["fraction"] == 1 and h["jaccard"] == top_jaccard and h["significant"] == top_significant]
     
+    if len(assignment) == 0:
+        assignment = [gene["haplotypes"][0]["type"]]
+
     results.append(
         (
             match,
-            "\n".join(table)
+            "\n".join(table),
+            "\t".join([allele["sequence_id"]] + assignment)
         )
     )
 
@@ -175,3 +186,5 @@ with open(snakemake.output.json, "w") as outfile:
 with open(snakemake.output.table, "w") as outfile:
     print("\n\n".join([r[1] for r in results]), file=outfile)
 
+with open(snakemake.output.call, "w") as outfile:
+    print("\n".join([r[2] for r in results]), file=outfile)
