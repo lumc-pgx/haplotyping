@@ -37,7 +37,7 @@ rule haplotypes:
         table = "haplotypes/{barcode}.haplotypes.txt"
     params:
         gene = GENE,
-        ignore_boundary = "OPTIONS" in config and "ingoreBoundary" in config["OPTIONS"]
+        ignore_boundary = "OPTIONS" in config and "ignoreBoundary" in config["OPTIONS"]
     script:
         "scripts/compare_haplotypes.py"
 
