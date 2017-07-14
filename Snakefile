@@ -5,6 +5,7 @@ configfile: srcdir("config.yaml")
 import os
 import glob
 import yaml
+import datetime
 
 INPUT_FILES = glob.glob(config["VARIANT_DATA_PATH"] + "/*.json")
 BARCODE_IDS = [".".join(os.path.basename(f).split(".")[:-1]) for f in INPUT_FILES]
@@ -28,7 +29,8 @@ rule all:
     input:
         expand("matches/{barcodes}.matches.json", barcodes=BARCODE_IDS),
         expand("tables/{barcodes}.matches.txt", barcodes=BARCODE_IDS),
-        expand("haplotypes/{barcodes}.haplotype.txt", barcodes=BARCODE_IDS)
+        expand("haplotypes/{barcodes}.haplotype.txt", barcodes=BARCODE_IDS),
+        "config.{}.yaml".format("{:%Y-%m-%d_%H:%M:%S}".format(datetime.datetime.now()))
 
 
 rule matches:
@@ -63,3 +65,11 @@ rule pick:
         default = GENE["haplotypes"][0]["type"]
     script:
         "scripts/pick_haplotype.py"
+
+
+rule write_config:
+    output:
+        "config.{timestamp}.yaml"
+    run:
+        with open(output[0], "w") as outfile:
+            yaml.dump(config, outfile, default_flow_style=False)
