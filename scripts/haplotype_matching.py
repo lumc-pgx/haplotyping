@@ -1,4 +1,4 @@
-import json, yaml
+import json
   
 # make a set containing all reference variants for the gene
 gene = snakemake.params.gene
@@ -62,13 +62,13 @@ def characterise_allele(found_variants, gene_definition):
     return summary
 
 
-def match_allele(variants, gene, trim_boundary=False):
+def match_allele(allele, gene, trim_boundary=False):
     """
     Compare the allele variants against the haplotype definitions
     Return a dictionary summarizing the comparison
     """
     # sort the variants
-    variants = sorted(variants)
+    variants = sorted(allele["variants"])
     
     # trim the first and last variants if requested
     if trim_boundary:
@@ -105,6 +105,7 @@ def match_allele(variants, gene, trim_boundary=False):
     sorted_allele = sorted(filtered_allele, key=lambda x: (len(x["significant"]), x["fraction"], x["jaccard"]), reverse=True)
     
     return {
+        "sequence_id": allele["sequence_id"],
         "known_variants": sorted(list(known_variants)),
         "novel_variants": sorted(list(novel_variants)),
         "significant_variants": sorted(list(significant_variants)),
@@ -112,79 +113,8 @@ def match_allele(variants, gene, trim_boundary=False):
     }
 
 
-def tabulate_allele_matches(allele, match):
-    """
-    Convert allele match information into a tabular representation for printing
-    """
-    overview = "\n".join(
-        [
-            "- {}    %id: {}".format(allele["sequence_id"], allele["identity"]),
-            "- Variants: {}    Known: {}    Novel: {}    Significant: {}".format(
-                len(match["known_variants"]) + len(match["novel_variants"]),
-                len(match["known_variants"]),
-                len(match["novel_variants"]),
-                len(match["significant_variants"])
-            )
-        ]
-    )
-    
-    hits = match["haplotypes"]
-    columns = []
-    columns.append(["{:25}".format("Variant")] + \
-                   ["{:25}".format(v) for v in match["known_variants"]] + \
-                   ["{:25}".format(label) for label in ["Fraction", "Proportion", "Jaccard", "Significant"]])
-
-    for hit in hits:
-        column = ["{:6}".format(hit["haplotype"])]
-        column += ["{:6}".format("$" if v in match["significant_variants"] and v in hit["haplotype_variants"] else ("*" if v in hit["haplotype_variants"] else "")) for v in match["known_variants"]]
-        column.append("{:6}".format("{}/{}".format(len(hit["shared_variants"]), len(hit["haplotype_variants"]))))
-        column.append("{:6}".format(str(hit["fraction"])[:4]))
-        column.append("{:6}".format(str(hit["jaccard"])[:4]))
-        column.append("{:<6}".format(len(hit["significant"])))
-        columns.append(column)
-        
-    results = []
-    for row in range(len(columns[0])):
-        results.append("".join([c[row] for c in columns]))
-    
-    table = "\n".join(results)
-    
-    return (overview, table)
-
-
-with open(snakemake.input.alleles, 'r') as infile:
+with open(snakemake.input[0], 'r') as infile, open(snakemake.output[0], "w") as outfile:
     alleles = json.load(infile)
+    results = [match_allele(allele, gene, snakemake.params.ignore_boundary) for allele in alleles]
+    print(json.dumps(results, indent=4, separators=(',', ': ')), file=outfile)
 
-results = []
-for allele in alleles:
-    match = match_allele(allele["variants"], gene, snakemake.params.ignore_boundary)
-    match["sequence_id"] = allele["sequence_id"]
-    
-    table = tabulate_allele_matches(allele, match)
-
-    assignment = []
-    if len(match["haplotypes"]) > 0:
-        top_jaccard = match["haplotypes"][0]["jaccard"]
-        top_significant = match["haplotypes"][0]["significant"]
-
-        assignment = [h["haplotype"] for h in match["haplotypes"] if h["fraction"] == 1 and h["jaccard"] == top_jaccard and h["significant"] == top_significant]
-    
-    if len(assignment) == 0:
-        assignment = [gene["haplotypes"][0]["type"]]
-
-    results.append(
-        (
-            match,
-            "\n".join(table),
-            "\t".join([allele["sequence_id"]] + assignment)
-        )
-    )
-
-with open(snakemake.output.json, "w") as outfile:
-    print(json.dumps([r[0] for r in results], indent=4, separators=(',', ': ')), file=outfile)
-
-with open(snakemake.output.table, "w") as outfile:
-    print("\n\n".join([r[1] for r in results]), file=outfile)
-
-with open(snakemake.output.call, "w") as outfile:
-    print("\n".join([r[2] for r in results]), file=outfile)
