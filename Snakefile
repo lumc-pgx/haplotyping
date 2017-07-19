@@ -16,6 +16,10 @@ with open(config["GENE"], "r") as infile:
 # handlers for workflow exit status
 onsuccess:
     print("Haplotype  workflow completed successfully")
+    config_file = "config.{}.json".format("{:%Y-%m-%d_%H:%M:%S}".format(datetime.datetime.now()))
+    with open(config_file, "w") as outfile:
+        print(json.dumps(config), file=outfile)
+
 onerror:
     print("Error encountered while executing workflow")
     shell("cat {log}")
