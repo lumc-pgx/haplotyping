@@ -17,7 +17,7 @@ The pipeline outputs three files per barcode:
 
 ## Installation
 - Clone the repository
-  - `git clone https://wgallard@git.lumc.nl/PharmacogenomicsPipe/haplotyping.git`
+  - `git clone https://git.lumc.nl/PharmacogenomicsPipe/haplotyping.git`
 
 - Change to the haplotyping directory
   - `cd haplotyping`
