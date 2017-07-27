@@ -33,8 +33,7 @@ rule all:
     input:
         expand("matches/{barcodes}.matches.json", barcodes=BARCODE_IDS),
         expand("tables/{barcodes}.matches.txt", barcodes=BARCODE_IDS),
-        expand("haplotypes/{barcodes}.haplotype.txt", barcodes=BARCODE_IDS),
-        "config.{}.yaml".format("{:%Y-%m-%d_%H:%M:%S}".format(datetime.datetime.now()))
+        expand("haplotypes/{barcodes}.haplotype.txt", barcodes=BARCODE_IDS)
 
 
 rule matches:
@@ -70,10 +69,3 @@ rule pick:
     script:
         "scripts/pick_haplotype.py"
 
-
-rule write_config:
-    output:
-        "config.{timestamp}.yaml"
-    run:
-        with open(output[0], "w") as outfile:
-            yaml.dump(config, outfile, default_flow_style=False)
