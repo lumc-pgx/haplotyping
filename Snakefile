@@ -7,6 +7,12 @@ import glob
 import yaml
 import datetime
 
+# yaml representer for dumping config
+from yaml.representer import Representer
+import collections
+yaml.add_representer(collections.defaultdict, Representer.represent_dict)
+
+
 INPUT_FILES = glob.glob(config["VARIANT_DATA_PATH"] + "/*.json")
 BARCODE_IDS = [".".join(os.path.basename(f).split(".")[:-1]) for f in INPUT_FILES]
 
@@ -16,9 +22,9 @@ with open(config["GENE"], "r") as infile:
 # handlers for workflow exit status
 onsuccess:
     print("Haplotype  workflow completed successfully")
-    config_file = "config.{}.json".format("{:%Y-%m-%d_%H:%M:%S}".format(datetime.datetime.now()))
+    config_file = "config.{}.yaml".format("{:%Y-%m-%d_%H:%M:%S}".format(datetime.datetime.now()))
     with open(config_file, "w") as outfile:
-        print(json.dumps(config), file=outfile)
+        print(yaml.dump(config, default_flow_style=False), file=outfile)
 
 onerror:
     print("Error encountered while executing workflow")
