@@ -21,7 +21,7 @@ class Haplotyping(object):
         with open(config["GENE"], "r") as infile:
             self.GENE = yaml.safe_load(infile)
 
-        self.IGNORE_BOUNDARY = "ignoreBoundary" in config.get("STAGE_PARAMS", {}).get("HAPLOTYPER", [])
+        self.IGNORE_BOUNDARY = config.get("STAGE_PARAMS", {}).get("HAPLOTYPER", {}).get("ignoreBoundary", False)
 
     @property
     def inputs(self):

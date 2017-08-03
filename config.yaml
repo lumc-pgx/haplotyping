@@ -12,4 +12,4 @@ BARCODES: /path/to/barcodes.fasta
 # pipeline options
 STAGE_PARAMS:
   HAPLOTYPER:
-    - ignoreBoundary # insertions at start and end of sequence should be ignored
+    ignoreBoundary: True  # insertions at start and end of sequence should be ignored
