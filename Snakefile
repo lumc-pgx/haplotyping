@@ -1,6 +1,8 @@
 include: "helper.snake"
 PARAMS = Haplotyping(config, "Haplotype matching")
 
+onsuccess: PARAMS.onsuccess()
+onerror: PARAMS.onerror()
 
 # main workflow
 localrules:
