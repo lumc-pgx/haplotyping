@@ -1,11 +1,15 @@
 # Pipeline Configuration
 
 # Path to the folder containing the allele variants
-VARIANT_DATA_PATH: /home/wgallard/MyData/pharmacogenomics_pipeline/variant_calling/96_well_output/variants
+VARIANT_DATA_PATH: /path/to/folder
 
 # path to the gene definition file
-GENE: /home/wgallard/MyData/CYP2D6_Pipeline/test_data/gene/CYP2D6.yaml
+GENE: /path/to/gene.yaml
+
+# Path to barcode fasta file used for demultiplexing
+BARCODES: /path/to/barcodes.fasta
 
 # pipeline options
-OPTIONS:
-  - ignoreBoundary # insertions at start and end of sequence should be ignored
+STAGE_PARAMS:
+  HAPLOTYPER:
+    - ignoreBoundary # insertions at start and end of sequence should be ignored

@@ -1,0 +1,48 @@
+# imports
+import os
+import glob
+import yaml
+import datetime
+
+# yaml representer for dumping config
+from yaml.representer import Representer
+import collections
+
+class Haplotyping(object):
+    def __init__(self, config, workflow_name):
+        self.config = config
+        self.workflow_name = workflow_name
+
+        self.VARIANT_DATA_PATH = config["VARIANT_DATA_PATH"]
+        
+        with open(config["BARCODES"], "r") as bc_file:
+            self.BARCODE_IDS = [line.strip()[1:] for line in bc_file if line.startswith(">")]
+
+        with open(config["GENE"], "r") as infile:
+            self.GENE = yaml.safe_load(infile)
+
+        self.IGNORE_BOUNDARY = "ignoreBoundary" in config.get("STAGE_PARAMS", {}).get("HAPLOTYPER", [])
+
+    @property
+    def inputs(self):
+        return expand(self.VARIANT_DATA_PATH + "/{barcodes}.json", barcodes=self.BARCODE_IDS)
+
+    @property
+    def outputs(self):
+        return expand("matches/{barcodes}.matches.json", barcodes=self.BARCODE_IDS) + \
+               expand("tables/{barcodes}.matches.txt", barcodes=self.BARCODE_IDS) + \
+               expand("haplotypes/{barcodes}.haplotype.txt", barcodes=self.BARCODE_IDS)
+
+
+    # handlers for workflow exit status
+    def onsuccess(self):
+        print("{} workflow completed successfully".format(self.workflow_name))
+        yaml.add_representer(collections.defaultdict, Representer.represent_dict)
+        config_file = "config.{}.yaml".format("{:%Y-%m-%d_%H:%M:%S}".format(datetime.datetime.now()))
+        with open(config_file, "w") as outfile:
+            print(yaml.dump(self.config, default_flow_style=False), file=outfile)
+
+    def onerror(self):
+        print("Error encountered while executing workflow")
+        shell("cat {log}")
+

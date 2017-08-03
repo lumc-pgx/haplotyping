@@ -1,55 +1,25 @@
-# load config file
-configfile: srcdir("config.yaml")
-
-# imports
-import os
-import glob
-import yaml
-import datetime
-
-# yaml representer for dumping config
-from yaml.representer import Representer
-import collections
-yaml.add_representer(collections.defaultdict, Representer.represent_dict)
-
-
-INPUT_FILES = glob.glob(config["VARIANT_DATA_PATH"] + "/*.json")
-BARCODE_IDS = [".".join(os.path.basename(f).split(".")[:-1]) for f in INPUT_FILES]
-
-with open(config["GENE"], "r") as infile:
-    GENE = yaml.safe_load(infile)
-
-# handlers for workflow exit status
-onsuccess:
-    print("Haplotype  workflow completed successfully")
-    config_file = "config.{}.yaml".format("{:%Y-%m-%d_%H:%M:%S}".format(datetime.datetime.now()))
-    with open(config_file, "w") as outfile:
-        print(yaml.dump(config, default_flow_style=False), file=outfile)
-
-onerror:
-    print("Error encountered while executing workflow")
-    shell("cat {log}")
+include: "helper.snake"
+PARAMS = Haplotyping(config, "Haplotype matching")
 
 
 # main workflow
 localrules:
     all
 
+
 rule all:
     input:
-        expand("matches/{barcodes}.matches.json", barcodes=BARCODE_IDS),
-        expand("tables/{barcodes}.matches.txt", barcodes=BARCODE_IDS),
-        expand("haplotypes/{barcodes}.haplotype.txt", barcodes=BARCODE_IDS)
+        PARAMS.outputs
 
 
 rule matches:
     input:
-        config["VARIANT_DATA_PATH"] + "/{barcode}.json"
+        PARAMS.VARIANT_DATA_PATH + "/{barcode}.json"
     output:
         "matches/{barcode}.matches.json",
     params:
-        gene = GENE,
-        ignore_boundary = "OPTIONS" in config and "ignoreBoundary" in config["OPTIONS"]
+        gene = PARAMS.GENE,
+        ignore_boundary = PARAMS.IGNORE_BOUNDARY 
     script:
         "scripts/haplotype_matching.py"
 
@@ -60,7 +30,7 @@ rule tabulate:
     output:
        "tables/{barcode}.matches.txt"
     params:
-        gene = GENE
+        gene = PARAMS.GENE
     script:
         "scripts/haplotype_summary.py"
 
@@ -71,7 +41,7 @@ rule pick:
     output:
         "haplotypes/{barcode}.haplotype.txt"
     params:
-        default = GENE["haplotypes"][0]["type"]
+        default = PARAMS.GENE["haplotypes"][0]["type"]
     script:
         "scripts/pick_haplotype.py"
 
