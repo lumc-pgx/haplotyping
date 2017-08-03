@@ -13,8 +13,6 @@ class Haplotyping(object):
         self.config = config
         self.workflow_name = workflow_name
 
-        self.VARIANT_DATA_PATH = config["VARIANT_DATA_PATH"]
-        
         with open(config["BARCODES"], "r") as bc_file:
             self.BARCODE_IDS = [line.strip()[1:] for line in bc_file if line.startswith(">")]
 
@@ -25,7 +23,7 @@ class Haplotyping(object):
 
     @property
     def inputs(self):
-        return expand(self.VARIANT_DATA_PATH + "/{barcodes}.json", barcodes=self.BARCODE_IDS)
+        return expand(self.config["VARIANT_DATA_PATH"] + "/{barcodes}.json", barcodes=self.BARCODE_IDS)
 
     @property
     def outputs(self):

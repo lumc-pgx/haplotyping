@@ -14,7 +14,7 @@ rule all:
 
 rule matches:
     input:
-        PARAMS.VARIANT_DATA_PATH + "/{barcode}.json"
+        config["VARIANT_DATA_PATH"] + "/{barcode}.json"
     output:
         "matches/{barcode}.matches.json",
     params:
