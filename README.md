@@ -12,6 +12,23 @@ The pipeline outputs three files per barcode:
 - A {barcode}.matches.txt file which contains a human readable summary of the per-allele matches
 - A {barcode}.haplotype.txt file which contains the haplotype assignment per allele
 
+```plantuml
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+	0[label = "all", color = "0.00 0.6 0.85", style="rounded"];
+	1[label = "pick", color = "0.17 0.6 0.85", style="rounded"];
+	2[label = "matches", color = "0.33 0.6 0.85", style="rounded"];
+	3[label = "tabulate", color = "0.50 0.6 0.85", style="rounded"];
+	3 -> 0
+	1 -> 0
+	2 -> 0
+	2 -> 1
+	2 -> 3
+}
+```
+     
 ## Requirements
 - [Conda/Miniconda](https://conda.io/miniconda.html)  
 
@@ -39,4 +56,4 @@ Pipeline configuration settings can be altered by editing [config.yaml](config.y
   - `pipe-runner`
 - To specify that the pipeline should write output to a location other than the default:
   - `pipe-runner --directory path/to/output/directory`
-
+        
