@@ -1,0 +1,10 @@
+rule matches:
+    input:
+        variants = "haplotyping/inputs/{barcode}.json",
+        gene = config["GENE"]
+    output:
+        "haplotyping/matches/{barcode}.matches.json"
+    script:
+        "../scripts/haplotype_matching.py"
+
+

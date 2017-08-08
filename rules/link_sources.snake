@@ -1,0 +1,7 @@
+rule link_source:
+    input:
+        config["VARIANT_DATA_PATH"] + "/{barcode}.json"
+    output:
+        "haplotyping/inputs/{barcode}.json"
+    shell:
+        "ln -s {input} {output}"

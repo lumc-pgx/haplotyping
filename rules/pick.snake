@@ -1,0 +1,9 @@
+rule pick:
+    input:
+        matches = "haplotyping/matches/{barcode}.matches.json",
+        gene = config["GENE"]
+    output:
+        "haplotyping/haplotypes/{barcode}.haplotype.txt"
+    script:
+        "../scripts/pick_haplotype.py"
+
