@@ -1,7 +1,9 @@
 import json
+import yaml
   
 # make a set containing all reference variants for the gene
-gene = snakemake.params.gene
+with open(snakemake.input.gene, "r") as infile:
+    gene = yaml.safe_load(infile)
 reference_variants = {s["g_notation"] for s in gene["snps"]}
        
 def characterise_allele(found_variants, significant_variants, gene_definition):
@@ -109,8 +111,9 @@ def match_allele(allele, gene, trim_boundary=False):
     }
 
 
-with open(snakemake.input[0], 'r') as infile, open(snakemake.output[0], "w") as outfile:
+with open(snakemake.input.variants, 'r') as infile, open(snakemake.output[0], "w") as outfile:
     alleles = json.load(infile)
-    results = [match_allele(allele, gene, snakemake.params.ignore_boundary) for allele in alleles]
+    ignore_boundary = snakemake.config.get("STAGE_PARAMS", {}).get("HAPLOTYPER", {}).get("ignoreBoundary", False)
+    results = [match_allele(allele, gene, ignore_boundary) for allele in alleles]
     print(json.dumps(results, indent=4, separators=(',', ': ')), file=outfile)
 

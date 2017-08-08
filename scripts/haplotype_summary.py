@@ -1,6 +1,7 @@
 import json
+import yaml
   
-gene = snakemake.params.gene
+gene = yaml.safe_load(snakemake.input.gene)
 
 def tabulate_allele_matches(allele):
     """
@@ -42,7 +43,7 @@ def tabulate_allele_matches(allele):
     return (overview, table)
 
 
-with open(snakemake.input[0], 'r') as infile, open(snakemake.output[0], "w") as outfile:
+with open(snakemake.input.matches, 'r') as infile, open(snakemake.output[0], "w") as outfile:
     alleles = json.load(infile)
     results = ["\n".join(tabulate_allele_matches(a)) for a in alleles] 
     print("\n\n".join(results), file=outfile)

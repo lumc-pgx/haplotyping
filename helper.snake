@@ -13,23 +13,24 @@ class Haplotyping(object):
         self.config = config
         self.workflow_name = workflow_name
 
-        with open(config["BARCODES"], "r") as bc_file:
-            self.BARCODE_IDS = [line.strip()[1:] for line in bc_file if line.startswith(">")]
+        barcode_ids = yaml.load(config.get("BARCODE_IDS", "[]"))
 
-        with open(config["GENE"], "r") as infile:
-            self.GENE = yaml.safe_load(infile)
+        try:
+            with open(config["BARCODES"], "r") as bc_file:
+                barcode_file_ids = [line.strip()[1:] for line in bc_file if line.startswith(">")]
+        except (KeyError, IOError):
+            barcode_file_ids = []
 
-        self.IGNORE_BOUNDARY = config.get("STAGE_PARAMS", {}).get("HAPLOTYPER", {}).get("ignoreBoundary", False)
+        if len(barcode_ids) and len(barcode_file_ids):
+            assert all((x in barcode_file_ids for x in barcode_ids)), "barcode id not in barcode file"
 
-    @property
-    def inputs(self):
-        return expand(self.config["VARIANT_DATA_PATH"] + "/{barcodes}.json", barcodes=self.BARCODE_IDS)
+        self.BARCODE_IDS = barcode_ids if len(barcode_ids) else barcode_file_ids
 
     @property
     def outputs(self):
-        return expand("matches/{barcodes}.matches.json", barcodes=self.BARCODE_IDS) + \
-               expand("tables/{barcodes}.matches.txt", barcodes=self.BARCODE_IDS) + \
-               expand("haplotypes/{barcodes}.haplotype.txt", barcodes=self.BARCODE_IDS)
+        return expand("haplotyping/matches/{barcodes}.matches.json", barcodes=self.BARCODE_IDS) + \
+               expand("haplotyping/tables/{barcodes}.matches.txt", barcodes=self.BARCODE_IDS) + \
+               expand("haplotyping/haplotypes/{barcodes}.haplotype.txt", barcodes=self.BARCODE_IDS)
 
 
     # handlers for workflow exit status
