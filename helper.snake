@@ -1,51 +1,8 @@
-# imports
-import os
-import glob
-import yaml
-import datetime
+from pipe_helper import PipeHelper
 
-# yaml representer for dumping config
-from yaml.representer import Representer
-import collections
-
-class Haplotyping(object):
-    def __init__(self, config, workflow_name):
-        self.config = config
-        self.workflow_name = workflow_name
-
-        self.BARCODE_IDS = yaml.load(config.get("BARCODE_IDS", "[]"))
-
-        try:
-            with open(config["BARCODES"], "r") as bc_file:
-                self.BARCODES = [line.strip()[1:] for line in bc_file if line.startswith(">")]
-        except KeyError:
-            raise WorkflowError("Barcode file not specified")
-        except IOError:
-            raise WorkflowError("Could not load barcodes")
-
-        if len(self.BARCODE_IDS) and len(self.BARCODES):
-            assert all((x in self.BARCODES for x in self.BARCODE_IDS)), "barcode id not in barcode file"
-
-        if len(self.BARCODE_IDS) == 0:
-            self.BARCODE_IDS = self.BARCODES
-
-
+class HaplotypingHelper(PipeHelper):
     @property
     def outputs(self):
-        return expand("haplotyping/matches/{barcodes}.matches.json", barcodes=self.BARCODE_IDS) + \
-               expand("haplotyping/tables/{barcodes}.matches.txt", barcodes=self.BARCODE_IDS) + \
-               expand("haplotyping/haplotypes/{barcodes}.haplotype.txt", barcodes=self.BARCODE_IDS)
-
-
-    # handlers for workflow exit status
-    def onsuccess(self):
-        print("{} workflow completed successfully".format(self.workflow_name))
-        yaml.add_representer(collections.OrderedDict, Representer.represent_dict)
-        config_file = "config.{}.yaml".format("{:%Y-%m-%d_%H:%M:%S}".format(datetime.datetime.now()))
-        with open(config_file, "w") as outfile:
-            print(yaml.dump(self.config, default_flow_style=False), file=outfile)
-
-    def onerror(self):
-        print("Error encountered while executing workflow")
-        shell("cat {log}")
-
+        return expand("haplotyping/matches/{barcodes}.matches.json", barcodes=self.barcode_ids) + \
+               expand("haplotyping/tables/{barcodes}.matches.txt", barcodes=self.barcode_ids) + \
+               expand("haplotyping/haplotypes/{barcodes}.haplotype.txt", barcodes=self.barcode_ids)

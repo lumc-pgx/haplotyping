@@ -1,5 +1,5 @@
 include: "helper.snake"
-PARAMS = Haplotyping(config, "Haplotype matching")
+PARAMS = HaplotypingHelper(config, "Haplotype matching")
 
 onsuccess: PARAMS.onsuccess()
 onerror: PARAMS.onerror()
