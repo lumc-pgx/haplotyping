@@ -87,7 +87,7 @@ def match_allele(allele, trim_boundary=False):
     novel_variants = found_variants - reference_variants
     
     # significant variants found in allele
-    significant_variants = {s.g_notation for s in gene.snpts if s.tags is not None and \
+    significant_variants = {s.g_notation for s in gene.snps if s.tags is not None and \
         "significant" in s.tags} & found_variants
 
     # get all haplotype matches for this allele
