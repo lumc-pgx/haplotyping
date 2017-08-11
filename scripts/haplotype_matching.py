@@ -1,12 +1,13 @@
 import json
-import yaml
+import locus_processing
   
+# load the gene
+gene = locus_processing.load_locus_yaml(snakemake.input.gene)
+
 # make a set containing all reference variants for the gene
-with open(snakemake.input.gene, "r") as infile:
-    gene = yaml.safe_load(infile)
-reference_variants = {s["g_notation"] for s in gene["snps"]}
+reference_variants = {s.g_notation for s in gene.snps}
        
-def characterise_allele(found_variants, significant_variants, gene_definition):
+def characterise_allele(found_variants, significant_variants):
     """
     Compare the variants for an allele with all the known haplotypes.
     Characterise the commonality between the allele and the reference haplotypes.
@@ -17,9 +18,6 @@ def characterise_allele(found_variants, significant_variants, gene_definition):
     :param significant_variants: A set of variants for the gene which are annotated as being 'significant'
     :type significant_variants: {str, str, ...} where str is a string containing an hgvs variant description
 
-    :param gene_definition: The parsed gene file containing snp and haplotype definitions
-    :type gene_definition: dict
-    
     :return: a list of dicts where each dict characterises the commonality between the allelic
              variants and the variants for a single haplotype
     """
@@ -27,9 +25,9 @@ def characterise_allele(found_variants, significant_variants, gene_definition):
     summary = []
     
     # compare the allele variants with those for each defined haplotype
-    for haplotype in (h for h in gene_definition["haplotypes"] if len(h["snps"]) > 0):
+    for haplotype in (h for h in gene.haplotypes if len(h.snps) > 0):
         # the variants for this haplotype 
-        haplotype_variants = {s["g_notation"] for s in gene_definition["snps"] if s["id"] in set(haplotype["snps"])}
+        haplotype_variants = {s.g_notation for s in gene.snps if s.id in set(haplotype.snps)}
         
         # the variants shared between the allele and the haplotype
         shared_variants = found_variants & haplotype_variants
@@ -39,7 +37,7 @@ def characterise_allele(found_variants, significant_variants, gene_definition):
             summary.append(
                 {
                     # the current haplotype
-                    "haplotype": haplotype["type"], 
+                    "haplotype": haplotype.type, 
                     
                     # the variants for this haplotype
                     "haplotype_variants": sorted(list(haplotype_variants)), 
@@ -63,7 +61,7 @@ def characterise_allele(found_variants, significant_variants, gene_definition):
     return summary
 
 
-def match_allele(allele, gene, trim_boundary=False):
+def match_allele(allele, trim_boundary=False):
     """
     Compare the allele variants against the haplotype definitions
     Return a dictionary summarizing the comparison
@@ -89,11 +87,11 @@ def match_allele(allele, gene, trim_boundary=False):
     novel_variants = found_variants - reference_variants
     
     # significant variants found in allele
-    significant_variants = {s["g_notation"] for s in gene["snps"] if s["tags"] is not None and \
-        "significant" in s["tags"]} & found_variants
+    significant_variants = {s.g_notation for s in gene.snpts if s.tags is not None and \
+        "significant" in s.tags} & found_variants
 
     # get all haplotype matches for this allele
-    characterised_allele = characterise_allele(found_variants, significant_variants, gene)
+    characterised_allele = characterise_allele(found_variants, significant_variants)
     
     # filter to remove matches with zero overlap
     filtered_allele = [x for x in characterised_allele if x["fraction"] > 0]
@@ -114,6 +112,6 @@ def match_allele(allele, gene, trim_boundary=False):
 with open(snakemake.input.variants, 'r') as infile, open(snakemake.output[0], "w") as outfile:
     alleles = json.load(infile)
     ignore_boundary = snakemake.config.get("STAGE_PARAMS", {}).get("HAPLOTYPER", {}).get("ignoreBoundary", False)
-    results = [match_allele(allele, gene, ignore_boundary) for allele in alleles]
+    results = [match_allele(allele, ignore_boundary) for allele in alleles]
     print(json.dumps(results, indent=4, separators=(',', ': ')), file=outfile)
 

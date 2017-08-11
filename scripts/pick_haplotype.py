@@ -1,10 +1,10 @@
 import json
-import yaml
 from math import isclose
-
-with open(snakemake.input.gene, "r") as infile:
-    gene = yaml.safe_load(infile)
-default = gene["haplotypes"][0]["type"]
+import locus_processing
+  
+# load the gene
+gene = locus_processing.load_locus_yaml(snakemake.input.gene)
+default = gene.haplotypes[0].type
 
 def pick(allele):
     assignment = []

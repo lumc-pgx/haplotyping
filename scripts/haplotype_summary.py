@@ -1,7 +1,4 @@
 import json
-import yaml
-  
-gene = yaml.safe_load(snakemake.input.gene)
 
 def tabulate_allele_matches(allele):
     """

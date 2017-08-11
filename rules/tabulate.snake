@@ -1,7 +1,6 @@
 rule tabulate:
     input:
         matches = "haplotyping/matches/{barcode}.matches.json",
-        gene = config["GENE"]
     output:
         "haplotyping/tables/{barcode}.matches.txt"
     script:

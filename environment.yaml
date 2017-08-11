@@ -8,3 +8,5 @@ dependencies:
   - pip:
     - "git+ssh://git@git.lumc.nl/PharmacogenomicsPipe/pipe_runner.git@master#egg=pipe_runner"
     - "git+ssh://git@git.lumc.nl/PharmacogenomicsPipe/pipe_helper.git@master#egg=pipe_helper"
+    - "git+ssh://git@git.lumc.nl/PharmacogenomicsPipe/locus_processing.git@master#egg=locus_processing"
+
