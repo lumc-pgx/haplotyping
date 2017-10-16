@@ -4,7 +4,10 @@
 VARIANT_DATA_PATH: /path/to/folder
 
 # path to the gene definition file
-GENE: /path/to/gene.yaml
+LOCI:
+  - /path/to/gene_1.yaml
+  - /path/to/gene_2.yaml
+  - /path/to/gene_N.yaml
 
 # Path to barcode fasta file used for demultiplexing
 BARCODES: /path/to/barcodes.fasta

@@ -1,9 +1,9 @@
 rule matches:
     input:
-        variants = "haplotyping/inputs/{barcode}.json",
-        gene = config["GENE"]
+        variants = "haplotyping/inputs/{gene}/{barcode}.json",
+        locus = lambda wc: PARAMS.locus_file(wc.gene)
     output:
-        "haplotyping/matches/{barcode}.matches.json"
+        "haplotyping/matches/{gene}/{barcode}.matches.json"
     script:
         "../scripts/haplotype_matching.py"
 

@@ -3,6 +3,6 @@ from pipe_helper import PipeHelper
 class HaplotypingHelper(PipeHelper):
     @property
     def outputs(self):
-        return expand("haplotyping/matches/{barcodes}.matches.json", barcodes=self.barcode_ids) + \
-               expand("haplotyping/tables/{barcodes}.matches.txt", barcodes=self.barcode_ids) + \
-               expand("haplotyping/haplotypes/{barcodes}.haplotype.txt", barcodes=self.barcode_ids)
+        return expand("haplotyping/matches/{gene}/{barcodes}.matches.json", gene=list(self.genes), barcodes=self.barcode_ids) + \
+               expand("haplotyping/tables/{gene}/{barcodes}.matches.txt", gene=list(self.genes), barcodes=self.barcode_ids) + \
+               expand("haplotyping/haplotypes/{gene}/{barcodes}.haplotype.txt", gene=list(self.genes), barcodes=self.barcode_ids)

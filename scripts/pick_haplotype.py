@@ -2,9 +2,9 @@ import json
 from math import isclose
 import locus_processing
   
-# load the gene
-gene = locus_processing.load_locus_yaml(snakemake.input.gene)
-default = gene.haplotypes[0].type
+# load the gene definition
+locus = locus_processing.load_locus_yaml(snakemake.input.locus)
+default = locus.haplotypes[0].type
 
 def pick(allele):
     assignment = []

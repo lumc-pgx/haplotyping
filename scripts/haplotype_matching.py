@@ -1,11 +1,11 @@
 import json
 import locus_processing
   
-# load the gene
-gene = locus_processing.load_locus_yaml(snakemake.input.gene)
+# load the gene definition
+locus = locus_processing.load_locus_yaml(snakemake.input.locus)
 
 # make a set containing all reference variants for the gene
-reference_variants = {s.g_notation for s in gene.snps}
+reference_variants = {s.g_notation for s in locus.snps}
        
 def characterise_allele(found_variants, significant_variants):
     """
@@ -25,9 +25,9 @@ def characterise_allele(found_variants, significant_variants):
     summary = []
     
     # compare the allele variants with those for each defined haplotype
-    for haplotype in (h for h in gene.haplotypes if len(h.snps) > 0):
+    for haplotype in (h for h in locus.haplotypes if len(h.snps) > 0):
         # the variants for this haplotype 
-        haplotype_variants = {s.g_notation for s in gene.snps if s.id in set(haplotype.snps)}
+        haplotype_variants = {s.g_notation for s in locus.snps if s.id in set(haplotype.snps)}
         
         # the variants shared between the allele and the haplotype
         shared_variants = found_variants & haplotype_variants
@@ -87,7 +87,7 @@ def match_allele(allele, trim_boundary=False):
     novel_variants = found_variants - reference_variants
     
     # significant variants found in allele
-    significant_variants = {s.g_notation for s in gene.snps if s.tags is not None and \
+    significant_variants = {s.g_notation for s in locus.snps if s.tags is not None and \
         "significant" in s.tags} & found_variants
 
     # get all haplotype matches for this allele

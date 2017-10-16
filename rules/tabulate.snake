@@ -1,8 +1,8 @@
 rule tabulate:
     input:
-        matches = "haplotyping/matches/{barcode}.matches.json",
+        matches = "haplotyping/matches/{gene}/{barcode}.matches.json",
     output:
-        "haplotyping/tables/{barcode}.matches.txt"
+        "haplotyping/tables/{gene}/{barcode}.matches.txt"
     script:
         "../scripts/haplotype_summary.py"
 

@@ -1,9 +1,9 @@
 rule pick:
     input:
-        matches = "haplotyping/matches/{barcode}.matches.json",
-        gene = config["GENE"]
+        matches = "haplotyping/matches/{gene}/{barcode}.matches.json",
+        locus = lambda wc: PARAMS.locus_file(wc.gene)
     output:
-        "haplotyping/haplotypes/{barcode}.haplotype.txt"
+        "haplotyping/haplotypes/{gene}/{barcode}.haplotype.txt"
     script:
         "../scripts/pick_haplotype.py"
 
