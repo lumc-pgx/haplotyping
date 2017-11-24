@@ -98,7 +98,7 @@ def match_allele(allele, trim_boundary=False):
     
     # sort by number of significant variants, fraction and jaccard
     # this gives a list of haplotypes ordered by decreasing 'score'
-    sorted_allele = sorted(filtered_allele, key=lambda x: (len(x["significant"]), x["fraction"], x["jaccard"]), reverse=True)
+    sorted_allele = sorted(filtered_allele, key=lambda x: (x["fraction"],len(x["significant"]), x["jaccard"]), reverse=True)
     
     return {
         "sequence_id": allele["sequence_id"],
