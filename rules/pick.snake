@@ -3,7 +3,7 @@ rule pick:
         matches = "haplotyping/matches/{gene}/{barcode}.matches.json",
         locus = lambda wc: PARAMS.locus_file(wc.gene)
     output:
-        "haplotyping/haplotypes/{gene}/{barcode}.haplotype.txt"
+        "haplotyping/haplotypes/{gene}/{barcode}.haplotype.json"
     script:
         "../scripts/pick_haplotype.py"
 

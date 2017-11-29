@@ -20,8 +20,11 @@ def pick(allele):
     return assignment
 
 
-with open(snakemake.input.matches, 'r') as infile, open(snakemake.output[0], "w") as outfile:
+with open(snakemake.input.matches, 'r') as infile:
     alleles = json.load(infile)
-    results = ["\t".join([a["sequence_id"]] + pick(a)) for a in alleles]
-    print("\n".join(results), file=outfile)
 
+for allele in alleles:
+    allele["haplotype"] = pick(allele)
+
+with open(snakemake.output[0], "w") as outfile:
+    print(json.dumps(alleles, indent=4, separators=(',', ': ')), file=outfile)

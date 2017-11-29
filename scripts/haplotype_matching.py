@@ -67,18 +67,18 @@ def match_allele(allele, trim_boundary=False):
     Return a dictionary summarizing the comparison
     """
     # sort the variants
-    variants = sorted(allele["variants"])
+    variants = sorted(allele["variants"], key=lambda x: x["g_notation"])
     
     # trim the first and last variants if requested
     if trim_boundary:
-        if len(variants) > 0 and "ins" in variants[0]:
+        if len(variants) > 0 and "ins" in variants[0]["g_notation"]:
             variants = variants[1:]
     
-        if len(variants) > 0  and "ins" in variants[-1]:
+        if len(variants) > 0  and "ins" in variants[-1]["g_notation"]:
             variants = variants[:-1]
     
     # set of variants found in the allele
-    found_variants = set(variants)
+    found_variants = set(v["g_notation"] for v in variants)
     
     # known variants - intersection of found variants with the set of all reference variants
     known_variants = found_variants & reference_variants
@@ -89,6 +89,20 @@ def match_allele(allele, trim_boundary=False):
     # significant variants found in allele
     significant_variants = {s.g_notation for s in locus.snps if s.tags is not None and \
         "significant" in s.tags} & found_variants
+    
+    # tag the observed variants    
+    for v in variants:
+        if v["g_notation"] in known_variants:
+            v["tags"].append("known")
+        
+        if v["g_notation"] in novel_variants:
+            v["tags"].append("novel")
+        
+        if v["g_notation"] in significant_variants:
+            v["tags"].append("significant")
+    
+    # update the allele record
+    allele["variants"] = variants
 
     # get all haplotype matches for this allele
     characterised_allele = characterise_allele(found_variants, significant_variants)
@@ -98,15 +112,12 @@ def match_allele(allele, trim_boundary=False):
     
     # sort by number of significant variants, fraction and jaccard
     # this gives a list of haplotypes ordered by decreasing 'score'
-    sorted_allele = sorted(filtered_allele, key=lambda x: (x["fraction"],len(x["significant"]), x["jaccard"]), reverse=True)
+    sorted_allele = sorted(filtered_allele, key=lambda x: (x["fraction"], len(x["significant"]), x["jaccard"]), reverse=True)
     
-    return {
-        "sequence_id": allele["sequence_id"],
-        "known_variants": sorted(list(known_variants)),
-        "novel_variants": sorted(list(novel_variants)),
-        "significant_variants": sorted(list(significant_variants)),
-        "haplotypes":     sorted_allele
-    }
+    # add the haplotypes section
+    allele["haplotypes"] = sorted_allele
+    
+    return allele
 
 
 with open(snakemake.input.variants, 'r') as infile, open(snakemake.output[0], "w") as outfile:

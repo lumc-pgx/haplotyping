@@ -5,4 +5,4 @@ class HaplotypingHelper(PipeHelper):
     def outputs(self):
         return expand("haplotyping/matches/{gene}/{barcodes}.matches.json", gene=list(self.genes), barcodes=self.barcode_ids) + \
                expand("haplotyping/tables/{gene}/{barcodes}.matches.txt", gene=list(self.genes), barcodes=self.barcode_ids) + \
-               expand("haplotyping/haplotypes/{gene}/{barcodes}.haplotype.txt", gene=list(self.genes), barcodes=self.barcode_ids)
+               expand("haplotyping/haplotypes/{gene}/{barcodes}.haplotype.json", gene=list(self.genes), barcodes=self.barcode_ids)
